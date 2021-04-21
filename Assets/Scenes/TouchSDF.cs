@@ -16,6 +16,18 @@ public class TouchSDF : MonoBehaviour {
         v.z = -0.2f;
         cursor.transform.localPosition = v;
         Debug.Log($"Spawn {uv}, {v}");
-        spawner.Spawn(v);
+        StartCoroutine(Spawn(v));
+    }
+
+    IEnumerator Spawn(Vector3 v) { 
+        for(int i = 0 ; i < 1000 ; i++) {
+            spawner.Spawn(
+                v + 
+                new Vector3(
+                    UnityEngine.Random.Range(-0.1f, 0.1f), 
+                    UnityEngine.Random.Range(-0.1f, 0.1f), 0));
+            // spawner.Dump();
+            yield return null;
+        }
     }
 }

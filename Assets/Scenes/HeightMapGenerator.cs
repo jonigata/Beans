@@ -34,13 +34,13 @@ public class HeightMapGenerator : MonoBehaviour
                 float n = Mathf.PerlinNoise(
                     origin.x + x * scale.x / width, 
                     origin.y + y * scale.y / height);
-                pixels[y*width+x] = new Color(n, n, n);
+                pixels[y*width+x] = new Color(n, n, n, n);
             }
         }
 
         // テクスチャの生成
         Texture2D tex = new Texture2D(
-            width, height, TextureFormat.RGB24, false);
+            width, height, TextureFormat.RGBA32, false);
         tex.filterMode = FilterMode.Point;
         
         tex.SetPixels(pixels);

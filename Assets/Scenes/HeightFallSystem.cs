@@ -7,44 +7,40 @@ using Unity.Collections;
 using System;
 using static Unity.Mathematics.math;
 
-public class TerrainCollisionSystem : SystemBase
+public class HeightFallSystem : SystemBase
 {
     EntityQuery query;
-
+    
     protected override void OnCreate() {
-        query = GetEntityQuery(typeof(Translation), typeof(TerrainCollision));
+        query = GetEntityQuery(
+            typeof(Translation), typeof(Force), typeof(HeightMap));
     }
 
     protected override void OnUpdate() {
         Entities
-            .ForEach((ref Translation translation, in TerrainCollision terrain) =>
-            {
-                ApplyWall(ref translation, in terrain);
-            })
             .WithoutBurst()
+            .ForEach((ref Force force, 
+                      in Translation translation, 
+                      in HeightMap heightMap) =>
+            {
+                ApplyFall(ref force, in translation, in heightMap);
+            })
             .Run();
     }
 
-    void ApplyWall(ref Translation translation, in TerrainCollision terrain) {
-        var t = terrain.sdfTexture;
+    void ApplyFall(
+        ref Force force,
+        in Translation translation,
+        in HeightMap heightMap) {
+        var t = heightMap.heightMap;
         if (t == null) { return; }
 
-        var uv = GetUVFromLocalPoint(terrain.size, translation.Value);
-        var z = Pick(t, uv);
+        var uv = GetUVFromLocalPoint(heightMap.size, translation.Value);
 
-        if (0.5f < z) {
-            // do nothing
-        } else {
-            // Debug.Log($"outside {z}");
-            var g = Gradient(t, uv);
-            var location = GetLocalPointFromUV(
-                terrain.size, uv + g * (0.5f - z));
-            if (Single.IsNaN(location.x) || Single.IsNaN(location.y)) {
-                Debug.Log($"{g} {uv} {z}");
-                throw new Exception("x"); 
-            }
-            translation.Value = location;
-        }
+        var g = Gradient(t, uv);
+        force.Value = force.Value + float3(g.x, g.y, 0) * -10;
+        if (Single.IsNaN(force.Value.x)) { throw new Exception("x"); }
+        if (Single.IsNaN(force.Value.y)) { throw new Exception("x"); }
     }
     
     float2 Gradient(Texture2D texture, float2 uv) {
@@ -54,7 +50,7 @@ public class TerrainCollisionSystem : SystemBase
         var dis2 = Pick(texture, float2(uv.x, uv.y + delta));
         var dis3 = Pick(texture, float2(uv.x, uv.y - delta));
         // Debug.Log($"{dis0} {dis1} {dis2} {dis3}");
-        return normalizesafe(float2(dis0-dis1, dis2-dis3));
+        return float2(dis0-dis1, dis2-dis3);
     }
 
     float Pick(Texture2D texture, float2 uv) {

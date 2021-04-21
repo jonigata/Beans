@@ -677,7 +677,7 @@ MonoBehaviour:
   scale: 0.25
   sdfTexture: {fileID: 2800000, guid: 3c987ba23239d454fa01e87c92d23e79, type: 3}
   boardCollider: {fileID: 207133257}
-  heightMapGenerator: {fileID: 0}
+  heightMapGenerator: {fileID: 1116665066}
 --- !u!1 &1531134757
 GameObject:
   m_ObjectHideFlags: 0

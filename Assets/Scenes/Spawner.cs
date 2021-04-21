@@ -3,6 +3,7 @@ using UnityEngine;
 using Unity.Transforms;
 using Unity.Rendering;
 using Unity.Mathematics;
+using System.Collections.Generic;
 using static Unity.Mathematics.math;
 
 public class Spawner : MonoBehaviour
@@ -17,6 +18,7 @@ public class Spawner : MonoBehaviour
     EntityManager entityManager;
     EntityArchetype archetype;
     Entity parentEntity;
+    List<Entity> entities =  new List<Entity>();
 
     void Start() {
         // エンティティの生成
@@ -32,7 +34,9 @@ public class Spawner : MonoBehaviour
             typeof(RenderMesh),
             typeof(RenderBounds),
             typeof(TerrainCollision),
-            typeof(Force));
+            typeof(Force),
+            typeof(HeightMap)
+        );
 
         parentEntity = entityManager.CreateEntity(
             typeof(LocalToWorld),
@@ -64,6 +68,7 @@ public class Spawner : MonoBehaviour
     
     public void Spawn(Vector3 v) {
         Entity entity = entityManager.CreateEntity(archetype);
+        entities.Add(entity);
 
         entityManager.SetComponentData(
             entity,
@@ -72,7 +77,7 @@ public class Spawner : MonoBehaviour
             });
 
         entityManager.SetComponentData(
-            entity,
+           entity,
             new Scale {
                 Value = scale
             });
@@ -93,9 +98,24 @@ public class Spawner : MonoBehaviour
 
         entityManager.SetSharedComponentData(
             entity,
+            new HeightMap {
+                heightMap = heightMapGenerator.texture,
+                size = float2(size.x, size.y),
+            });
+
+        entityManager.SetSharedComponentData(
+            entity,
             new RenderMesh {
                 mesh = mesh,
                 material = material
             });
+    }
+
+    public void Dump() {
+        Debug.Log("================");
+        foreach (var entity in entities) {
+            var x = entityManager.GetChunk(entity);
+            Debug.Log($"x = {x.GetHashCode()}");
+        }
     }
 }
