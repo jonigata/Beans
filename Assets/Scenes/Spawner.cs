@@ -35,7 +35,6 @@ public class Spawner : MonoBehaviour
             typeof(Scale),
             typeof(RenderMesh),
             typeof(RenderBounds),
-            typeof(TerrainCollision),
             typeof(Force),
             typeof(HeightMap)
         );
@@ -72,6 +71,16 @@ public class Spawner : MonoBehaviour
                 boardSize = boardSize.x,
                 forceFactor = forceFactor
             });
+
+        var terrainCollision =
+            entityManager.CreateEntity(typeof(TerrainCollision));
+        entityManager.SetSharedComponentData(
+            terrainCollision,
+            new TerrainCollision {
+                sdfTexture = sdfTexture,
+                size = boardSize
+            });
+        
     }
 
     public void Spawn(Vector3 v) {
@@ -95,15 +104,6 @@ public class Spawner : MonoBehaviour
             new Parent {
                 Value = parentEntity
             });
-
-        if (sdfTexture != null) {
-            entityManager.SetSharedComponentData(
-                entity,
-                new TerrainCollision {
-                    sdfTexture = sdfTexture,
-                    size = boardSize
-                });
-        }
 
         if (heightMapHolder != null) { 
             entityManager.SetSharedComponentData(

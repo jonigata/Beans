@@ -10,34 +10,38 @@ using static Unity.Mathematics.math;
 public class TerrainCollisionSystem : SystemBase
 {
     protected override void OnUpdate() {
+        TerrainCollision terrain = new TerrainCollision();
+        Entities.ForEach(
+            (in TerrainCollision t) => terrain = t)
+            .WithoutBurst()
+            .Run();
+        if (terrain.sdfTexture == null) { return; }
+        
         Entities
-            .ForEach((ref Translation translation, in TerrainCollision terrain) =>
+            .ForEach((ref Translation translation) =>
             {
-                ApplyWall(ref translation, in terrain);
+                ApplyWall(ref translation, terrain);
             })
             .WithoutBurst()
             .Run();
     }
 
-    void ApplyWall(ref Translation translation, in TerrainCollision terrain) {
-        var t = terrain.sdfTexture;
-        if (t == null) { return; }
-
+    static void ApplyWall(ref Translation translation, TerrainCollision terrain) {
         var uv = GetUVFromLocalPoint(terrain.size, translation.Value);
-        var z = Pick(t, uv);
+        var z = Pick(terrain.sdfTexture, uv);
 
         if (0.5f < z) {
             // do nothing
         } else {
             // Debug.Log($"outside {z}");
-            var g = Gradient(t, uv);
+            var g = Gradient(terrain.sdfTexture, uv);
             var location = GetLocalPointFromUV(
                 terrain.size, uv + g * (0.5f - z));
             translation.Value = location;
         }
     }
     
-    float2 Gradient(Texture2D texture, float2 uv) {
+    static float2 Gradient(Texture2D texture, float2 uv) {
         float delta = 0.01f;
         var dis0 = Pick(texture, float2(uv.x + delta, uv.y));
         var dis1 = Pick(texture, float2(uv.x - delta, uv.y));
@@ -47,16 +51,16 @@ public class TerrainCollisionSystem : SystemBase
         return normalizesafe(float2(dis0-dis1, dis2-dis3));
     }
 
-    float Pick(Texture2D texture, float2 uv) {
+    static float Pick(Texture2D texture, float2 uv) {
         return texture.GetPixelBilinear(uv.x, uv.y).a;
     }
 
-    float2 GetUVFromLocalPoint(float2 size, float3 localPoint) {
+    static float2 GetUVFromLocalPoint(float2 size, float3 localPoint) {
         float2 p = float2(localPoint.x, localPoint.z);
         return p / size + 0.5f;
     }
 
-    float3 GetLocalPointFromUV(float2 size, float2 uv) {
+    static float3 GetLocalPointFromUV(float2 size, float2 uv) {
         float2 p = uv * size - (size * 0.5f);
         return float3(p.x, 0, p.y);
     }
