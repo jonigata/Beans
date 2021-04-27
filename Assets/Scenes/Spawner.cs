@@ -35,8 +35,7 @@ public class Spawner : MonoBehaviour
             typeof(Scale),
             typeof(RenderMesh),
             typeof(RenderBounds),
-            typeof(Force),
-            typeof(HeightMap)
+            typeof(Force)
         );
 
         parentEntity = entityManager.CreateEntity(
@@ -81,6 +80,15 @@ public class Spawner : MonoBehaviour
                 size = boardSize
             });
         
+        var heightMap = 
+            entityManager.CreateEntity(typeof(HeightMap));
+        entityManager.SetSharedComponentData(
+            heightMap,
+            new HeightMap {
+                heightMap = heightMapHolder.texture,
+                size = boardSize,
+                heightScale = heightMapHolder.heightScale,
+            });
     }
 
     public void Spawn(Vector3 v) {
@@ -104,16 +112,6 @@ public class Spawner : MonoBehaviour
             new Parent {
                 Value = parentEntity
             });
-
-        if (heightMapHolder != null) { 
-            entityManager.SetSharedComponentData(
-                entity,
-                new HeightMap {
-                    heightMap = heightMapHolder.texture,
-                    size = boardSize,
-                    heightScale = heightMapHolder.heightScale,
-                });
-        }
 
         entityManager.SetSharedComponentData(
             entity,
