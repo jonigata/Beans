@@ -12,8 +12,10 @@ public class Spawner : MonoBehaviour
     [SerializeField] Material material;
     [SerializeField] float scale;
     [SerializeField] Texture2D sdfTexture;
-    [SerializeField] BoxCollider boardCollider;
-    [SerializeField] HeightMapGenerator heightMapGenerator;
+    [SerializeField] HeightMapHolder heightMapHolder;
+    [SerializeField] Vector2 boardSize;
+    [SerializeField] float totalThreshold = 0.3f;
+    [SerializeField] float forceFactor = 120.0f;
 
     EntityManager entityManager;
     EntityArchetype archetype;
@@ -60,12 +62,18 @@ public class Spawner : MonoBehaviour
             new Scale {
                 Value = transform.lossyScale.x
             });
+
+        var replusionConfig = 
+            entityManager.CreateEntity(typeof(RepulsionConfig));
+        entityManager.SetComponentData(
+            replusionConfig,
+            new RepulsionConfig {
+                totalThreshold = totalThreshold,
+                boardSize = boardSize.x,
+                forceFactor = forceFactor
+            });
     }
 
-    public void Spawn(Vector2 v) {
-        Spawn(new Vector3(v.x, v.y, 0));
-    }
-    
     public void Spawn(Vector3 v) {
         Entity entity = entityManager.CreateEntity(archetype);
         entities.Add(entity);
@@ -88,20 +96,24 @@ public class Spawner : MonoBehaviour
                 Value = parentEntity
             });
 
-        Vector3 size = boardCollider.size;
-        entityManager.SetSharedComponentData(
-            entity,
-            new TerrainCollision {
-                sdfTexture = sdfTexture,
-                size = float2(size.x, size.y),
-            });
+        if (sdfTexture != null) {
+            entityManager.SetSharedComponentData(
+                entity,
+                new TerrainCollision {
+                    sdfTexture = sdfTexture,
+                    size = boardSize
+                });
+        }
 
-        entityManager.SetSharedComponentData(
-            entity,
-            new HeightMap {
-                heightMap = heightMapGenerator.texture,
-                size = float2(size.x, size.y),
-            });
+        if (heightMapHolder != null) { 
+            entityManager.SetSharedComponentData(
+                entity,
+                new HeightMap {
+                    heightMap = heightMapHolder.texture,
+                    size = boardSize,
+                    heightScale = heightMapHolder.heightScale,
+                });
+        }
 
         entityManager.SetSharedComponentData(
             entity,

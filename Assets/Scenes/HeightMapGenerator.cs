@@ -5,13 +5,13 @@ using UnityEngine;
 
 public class HeightMapGenerator : MonoBehaviour
 {
+    [SerializeField] HeightMapHolder holder;
+
     public Vector2 origin = Vector2.zero;
     public Vector2 scale = Vector2.one;
 
     Vector2 gOrigin;
     Vector2 gScale;
-
-    [NonSerialized] public Texture2D texture; 
 
     void Start() {
         UpdateTexture();
@@ -57,6 +57,36 @@ public class HeightMapGenerator : MonoBehaviour
 
         gOrigin = origin;
         gScale = scale;
+        holder.texture = tex;
+    }
+    /*
+    void MakeTextureFromTerrain(TerrainData terrainData) {
+        int width = 512;
+        int height = 512;
+        Color[] pixels = new Color[width*height];
+        
+        float interval = 1.0f / 512;
+        float[,] heights = terrainData.GetInterpolatedHeights(
+            interval/2, interval/2, 512, 512, interval, interval);
+
+        for (int y = 0 ; y < height ; y++) {
+            for (int x = 0 ; x < width ; x++) {
+                var n = heights[x,y];
+                pixels[y*width+x] = new Color(n, n, n, n);
+            }
+        }
+
+        // テクスチャの生成
+        Texture2D tex = new Texture2D(
+            width, height, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Point;
+        
+        tex.SetPixels(pixels);
+        tex.Apply();
+
+        gOrigin = origin;
+        gScale = scale;
         texture = tex;
     }
+    */
 }
