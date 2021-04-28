@@ -10,33 +10,31 @@ using static Unity.Mathematics.math;
 public class TerrainCollisionSystem : SystemBase
 {
     protected override void OnUpdate() {
-        TerrainCollision terrain = new TerrainCollision();
-        Entities.ForEach(
-            (in TerrainCollision t) => terrain = t)
-            .WithoutBurst()
-            .Run();
-        if (terrain.sdfTexture == null) { return; }
+        // config
+        BoardConfig config = new BoardConfig();
+        Entities.ForEach((in BoardConfig c) => config = c).WithoutBurst().Run();
+        if (config.sdfTexture == null) { return; }
         
         Entities
             .ForEach((ref Translation translation) =>
             {
-                ApplyWall(ref translation, terrain);
+                ApplyWall(ref translation, config);
             })
             .WithoutBurst()
             .Run();
     }
 
-    static void ApplyWall(ref Translation translation, TerrainCollision terrain) {
-        var uv = GetUVFromLocalPoint(terrain.size, translation.Value);
-        var z = Pick(terrain.sdfTexture, uv);
+    static void ApplyWall(ref Translation translation, BoardConfig config) {
+        var uv = GetUVFromLocalPoint(config.size, translation.Value);
+        var z = Pick(config.sdfTexture, uv);
 
         if (0.5f < z) {
             // do nothing
         } else {
             // Debug.Log($"outside {z}");
-            var g = Gradient(terrain.sdfTexture, uv);
+            var g = Gradient(config.sdfTexture, uv);
             var location = GetLocalPointFromUV(
-                terrain.size, uv + g * (0.5f - z));
+                config.size, uv + g * (0.5f - z));
             translation.Value = location;
         }
     }

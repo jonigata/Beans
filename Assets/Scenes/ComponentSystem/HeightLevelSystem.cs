@@ -10,29 +10,24 @@ using static Unity.Mathematics.math;
 public class HeightLevelSystem : SystemBase
 {
     protected override void OnUpdate() {
-        HeightMap heightMap = new HeightMap();
-        Entities.ForEach(
-            (in HeightMap h) => heightMap = h)
-            .WithoutBurst()
-            .Run();
-        var t = heightMap.heightMap;
-        if (t == null) { return; }
+        // config
+        BoardConfig config = new BoardConfig();
+        Entities.ForEach((in BoardConfig c) => config = c).WithoutBurst().Run();
+        if (config.heightMap == null) { return; }
 
         Entities
-            .WithoutBurst()
             .ForEach((ref Translation translation) =>
             {
-                ApplyLevel(ref translation, heightMap);
+                ApplyLevel(ref translation, config);
             })
+            .WithoutBurst()
             .Run();
     }
 
-    static void ApplyLevel(
-        ref Translation translation, HeightMap heightMap) {
-
-        var t = heightMap.heightMap;
-        var uv = GetUVFromLocalPoint(heightMap.size, translation.Value);
-        var level = Pick(t, uv) * heightMap.heightScale;
+    static void ApplyLevel(ref Translation translation, BoardConfig config) {
+        var t = config.heightMap;
+        var uv = GetUVFromLocalPoint(config.size, translation.Value);
+        var level = Pick(t, uv) * config.heightScale;
         translation.Value = float3(
             translation.Value.x, 
             level + 0.2f,

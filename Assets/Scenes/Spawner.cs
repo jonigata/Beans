@@ -61,33 +61,17 @@ public class Spawner : MonoBehaviour
                 Value = transform.lossyScale.x
             });
 
-        var replusionConfig = 
-            entityManager.CreateEntity(typeof(RepulsionConfig));
-        entityManager.SetComponentData(
-            replusionConfig,
-            new RepulsionConfig {
-                totalThreshold = totalThreshold,
-                boardSize = boardSize.x,
-                forceFactor = forceFactor
-            });
-
-        var terrainCollision =
-            entityManager.CreateEntity(typeof(TerrainCollision));
+        var boardConfig = 
+            entityManager.CreateEntity(typeof(BoardConfig));
         entityManager.SetSharedComponentData(
-            terrainCollision,
-            new TerrainCollision {
-                sdfTexture = sdfTexture,
-                size = boardSize
-            });
-        
-        var heightMap = 
-            entityManager.CreateEntity(typeof(HeightMap));
-        entityManager.SetSharedComponentData(
-            heightMap,
-            new HeightMap {
-                heightMap = heightMapHolder.texture,
+            boardConfig,
+            new BoardConfig {
                 size = boardSize,
+                sdfTexture = sdfTexture,
+                heightMap = heightMapHolder.texture,
                 heightScale = heightMapHolder.heightScale,
+                neighborThreshold = totalThreshold,
+                forceFactor = forceFactor
             });
     }
 

@@ -10,19 +10,16 @@ using static Unity.Mathematics.math;
 public class HeightFallSystem : SystemBase
 {
     protected override void OnUpdate() {
-        HeightMap heightMap = new HeightMap();
-        Entities.ForEach(
-            (in HeightMap h) => heightMap = h)
-            .WithoutBurst()
-            .Run();
-        var t = heightMap.heightMap;
-        if (t == null) { return; }
+        // config
+        BoardConfig config = new BoardConfig();
+        Entities.ForEach((in BoardConfig c) => config = c).WithoutBurst().Run();
+        if (config.heightMap == null) { return; }
 
         Entities
             .WithoutBurst()
             .ForEach((ref Force force, in Translation translation) =>
             {
-                ApplyFall(ref force, in translation, heightMap);
+                ApplyFall(ref force, in translation, config);
             })
             .Run();
     }
@@ -30,13 +27,11 @@ public class HeightFallSystem : SystemBase
     void ApplyFall(
         ref Force force,
         in Translation translation,
-        HeightMap heightMap) {
-        var t = heightMap.heightMap;
-        if (t == null) { return; }
+        BoardConfig config) {
 
-        var uv = GetUVFromLocalPoint(heightMap.size, translation.Value);
+        var uv = GetUVFromLocalPoint(config.size, translation.Value);
 
-        var g = Gradient(t, uv);
+        var g = Gradient(config.heightMap, uv);
         force.Value = force.Value + float3(g.x, 0, g.y) * -10;
     }
     

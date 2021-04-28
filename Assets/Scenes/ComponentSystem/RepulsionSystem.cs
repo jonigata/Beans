@@ -21,15 +21,16 @@ public class RepulsionSystem : SystemBase
     protected override void OnUpdate()
     {
         // config
-        RepulsionConfig config = new RepulsionConfig();
-        Entities.ForEach((in RepulsionConfig c) => config = c).Run();
+        BoardConfig config = new BoardConfig();
+        Entities.ForEach((in BoardConfig c) => config = c).WithoutBurst().Run();
 
         // elements 収集
         int dataCount = query.CalculateEntityCount();
 
-        var wh = config.boardSize*2;
+        var size = config.size;
+        var size2 = size*2;
         var quadTree = new NativeQuadTree.NativeQuadTree<int>(
-            new NativeQuadTree.AABB2D(wh, wh), Allocator.TempJob);
+            new NativeQuadTree.AABB2D(size2, size2), Allocator.TempJob);
         var elements = new NativeArray<NativeQuadTree.QuadElement<int>>(
             dataCount, Allocator.TempJob);
 
@@ -37,7 +38,7 @@ public class RepulsionSystem : SystemBase
             (int entityInQueryIndex, in Translation t, in Force f) => {
                 elements[entityInQueryIndex] = 
                     new NativeQuadTree.QuadElement<int> {
-                    pos = t.Value.xz + float2(config.boardSize),
+                    pos = t.Value.xz + float2(size),
                     element = entityInQueryIndex
                 };
             })
@@ -54,7 +55,9 @@ public class RepulsionSystem : SystemBase
             .Schedule();
 
         // main process
-        var totalThresholdSq = lengthsq(config.totalThreshold);
+        var totalThresholdSq = lengthsq(config.neighborThreshold);
+        var neighborThreshold = config.neighborThreshold;
+        var forceFactor = config.forceFactor;
 
         var forces = query.ToComponentDataArray<Force>(Allocator.TempJob);
 
@@ -66,7 +69,7 @@ public class RepulsionSystem : SystemBase
                     results.Clear();
                     var bounds = new NativeQuadTree.AABB2D(
                         elements[i].pos, 
-                        float2(config.totalThreshold));
+                        float2(neighborThreshold));
                     quadTree.RangeQuery(bounds, results);
                 
                     float2 p = elements[i].pos;
@@ -78,10 +81,9 @@ public class RepulsionSystem : SystemBase
                         float2 d = q - p;
                         float distsq = lengthsq(d);
                         if (distsq < totalThresholdSq) {
-                            var rd = lengthsq(
-                                config.totalThreshold - sqrt(distsq));
+                            var rd = lengthsq(neighborThreshold - sqrt(distsq));
                         
-                            float2 v = d * (rd * config.forceFactor);
+                            float2 v = d * (rd * forceFactor);
                             float activeWeight = 1.0f;
                             float passiveWeight = 1.0f;
                             float denominator = activeWeight + passiveWeight;
