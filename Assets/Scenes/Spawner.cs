@@ -71,7 +71,8 @@ public class Spawner : MonoBehaviour
                 heightMap = heightMapHolder.texture,
                 heightScale = heightMapHolder.heightScale,
                 neighborThreshold = totalThreshold,
-                forceFactor = forceFactor
+                forceFactor = forceFactor,
+                quadTree = new BoardConfig.QuadTree()
             });
     }
 

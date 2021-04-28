@@ -8,6 +8,7 @@ using Unity.Burst;
 using System;
 using static Unity.Mathematics.math;
 
+[UpdateInGroup(typeof(NearestNeighborGroup))]
 public class RepulsionSystem : SystemBase
 {
     private EntityQuery query;
