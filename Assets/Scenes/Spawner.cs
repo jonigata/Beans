@@ -9,7 +9,8 @@ using static Unity.Mathematics.math;
 public class Spawner : MonoBehaviour
 {
     [SerializeField] Mesh mesh;
-    [SerializeField] Material material;
+    [SerializeField] Material rubyMaterial;
+    [SerializeField] Material sapphireMaterial;
     [SerializeField] float scale;
     [SerializeField] Texture2D sdfTexture;
     [SerializeField] HeightMapHolder heightMapHolder;
@@ -35,7 +36,8 @@ public class Spawner : MonoBehaviour
             typeof(Scale),
             typeof(RenderMesh),
             typeof(RenderBounds),
-            typeof(Force)
+            typeof(Force),
+            typeof(Pawn)
         );
 
         parentEntity = entityManager.CreateEntity(
@@ -76,7 +78,7 @@ public class Spawner : MonoBehaviour
             });
     }
 
-    public void Spawn(Vector3 v) {
+    public void Spawn(TeamTag team, Vector3 v) {
         Entity entity = entityManager.CreateEntity(archetype);
         entities.Add(entity);
 
@@ -97,6 +99,20 @@ public class Spawner : MonoBehaviour
             new Parent {
                 Value = parentEntity
             });
+
+        entityManager.SetComponentData(
+            entity,
+            new Pawn {
+                Team = team,
+                Health = 100.0f
+            });
+
+        Material material = null;
+        if (team == TeamTag.Alpha) {
+            material = rubyMaterial;
+        } else {
+            material = sapphireMaterial;
+        }
 
         entityManager.SetSharedComponentData(
             entity,

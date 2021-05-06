@@ -20,8 +20,14 @@ public class BoardTouchHandler : MonoBehaviour {
     }
 
     IEnumerator Spawn(Vector3 v) { 
+        var tag = TeamTag.Alpha;
+        if (Input.GetKey(KeyCode.LeftControl)) {
+            tag = TeamTag.Beta;
+        }
+
         for(int i = 0 ; i < countPerTouch ; i++) {
             spawner.Spawn(
+                tag,
                 v + 
                 new Vector3(
                     UnityEngine.Random.Range(-0.1f, 0.1f), 
