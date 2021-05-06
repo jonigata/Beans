@@ -19,7 +19,8 @@ public class Spawner : MonoBehaviour
     [SerializeField] float forceFactor = 120.0f;
 
     EntityManager entityManager;
-    EntityArchetype archetype;
+    EntityArchetype alphaArchetype;
+    EntityArchetype betaArchetype;
     Entity parentEntity;
     List<Entity> entities =  new List<Entity>();
 
@@ -27,7 +28,7 @@ public class Spawner : MonoBehaviour
         // エンティティの生成
         entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
-        archetype = entityManager.CreateArchetype(
+        alphaArchetype = entityManager.CreateArchetype(
             typeof(LocalToWorld),
             typeof(LocalToParent),
             typeof(Parent),
@@ -37,7 +38,22 @@ public class Spawner : MonoBehaviour
             typeof(RenderMesh),
             typeof(RenderBounds),
             typeof(Force),
-            typeof(Pawn)
+            typeof(Pawn),
+            typeof(Alpha)
+        );
+
+        betaArchetype = entityManager.CreateArchetype(
+            typeof(LocalToWorld),
+            typeof(LocalToParent),
+            typeof(Parent),
+            typeof(Translation),
+            typeof(Rotation),
+            typeof(Scale),
+            typeof(RenderMesh),
+            typeof(RenderBounds),
+            typeof(Force),
+            typeof(Pawn),
+            typeof(Beta)
         );
 
         parentEntity = entityManager.CreateEntity(
@@ -79,7 +95,8 @@ public class Spawner : MonoBehaviour
     }
 
     public void Spawn(TeamTag team, Vector3 v) {
-        Entity entity = entityManager.CreateEntity(archetype);
+        Entity entity = entityManager.CreateEntity(
+            team == TeamTag.Alpha ? alphaArchetype : betaArchetype);
         entities.Add(entity);
 
         entityManager.SetComponentData(

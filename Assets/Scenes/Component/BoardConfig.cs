@@ -8,8 +8,12 @@ using System;
 public struct BoardConfig : ISharedComponentData, IEquatable<BoardConfig>
 {
     public class QuadTree {
-        public NativeQuadTree.NativeQuadTree<int> content;
-        public NativeArray<NativeQuadTree.QuadElement<int>> elements;
+        public NativeQuadTree.NativeQuadTree<int> allTree;
+        public NativeQuadTree.NativeQuadTree<int> alphaTree;
+        public NativeQuadTree.NativeQuadTree<int> betaTree;
+        public NativeArray<NativeQuadTree.QuadElement<int>> allElements;
+        public NativeArray<NativeQuadTree.QuadElement<int>> alphaElements;
+        public NativeArray<NativeQuadTree.QuadElement<int>> betaElements;
     }
 
     public float2 size;
@@ -39,6 +43,12 @@ public struct BoardConfig : ISharedComponentData, IEquatable<BoardConfig>
             heightScale.GetHashCode() ^
             neighborThreshold.GetHashCode() ^
             forceFactor.GetHashCode() ^
-            quadTree.content.GetHashCode();
+            quadTree.allTree.GetHashCode() ^
+            quadTree.alphaTree.GetHashCode() ^
+            quadTree.betaTree.GetHashCode() ^
+            quadTree.allElements.GetHashCode() ^
+            quadTree.alphaElements.GetHashCode() ^
+            quadTree.betaElements.GetHashCode()
+            ;
     }
 }

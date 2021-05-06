@@ -16,3 +16,12 @@ public struct Pawn : IComponentData
     public float HitEffectInterval;
     public float2 HitEffectPosition;
 }
+
+[GenerateAuthoringComponent]
+public struct Alpha : IComponentData
+{
+}
+[GenerateAuthoringComponent]
+public struct Beta : IComponentData
+{
+}
